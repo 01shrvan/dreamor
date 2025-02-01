@@ -1,21 +1,21 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@repo/ui/components/button"
 import { Input } from "@repo/ui/components/input"
 import { ScrollArea } from "@repo/ui/components/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/avatar"
-import { ImagePlus, Send, Plus, Sparkles, Clock, Search, Scissors } from "lucide-react"
+import { ImagePlus, Send, Plus, Sparkles, Clock, Search, Scissors, Menu } from "lucide-react"
 import Image from "next/image"
 import type { Message, ChatHistory } from "./types/chat"
 
-export default function Chat() {
+const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [files, setFiles] = useState<FileList | undefined>()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   // Fashion-specific chat history
   const chatHistory: ChatHistory[] = [
@@ -28,8 +28,6 @@ export default function Chat() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!input.trim() && !files) return
-
-    setIsLoading(true)
 
     // Create a new message
     const newMessage: Message = {
@@ -52,28 +50,15 @@ export default function Chat() {
       fileInputRef.current.value = ""
     }
 
-    try {
-      // Here you would integrate with your backend
-      // const response = await fetch('/api/your-backend', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ message: input, attachments: files }),
-      // })
-      // const data = await response.json()
-
-      // Simulated assistant response
-      setTimeout(() => {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: "This is where your backend response would go.",
-          role: "assistant",
-        }
-        setMessages((prev) => [...prev, assistantMessage])
-        setIsLoading(false)
-      }, 1000)
-    } catch (error) {
-      console.error("Error sending message:", error)
-      setIsLoading(false)
-    }
+    // Simulated AI response for spring-related queries
+    setTimeout(() => {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "hi",
+        role: "assistant",
+      }
+      setMessages((prev) => [...prev, assistantMessage])
+    }, 1000)
   }
 
   const startNewChat = () => {
@@ -81,22 +66,26 @@ export default function Chat() {
     setMessages([])
   }
 
+  const toggleMobileSidebar = () => setIsMobileSidebarOpen((prev) => !prev)
+
   return (
-    <div className="flex h-screen bg-[#F5F5F5] text-gray-800">
+    <div className="flex h-screen bg-[#1E1E1E] overflow-hidden">
       {/* Sidebar */}
-      <div className="hidden md:flex w-[280px] flex-col border-r border-gray-200 bg-white">
-        <div className="p-4">
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#1E1E1E] transform transition-transform duration-300 ease-in-out ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0`}
+      >
+        <div className="p-2">
           <Button
             variant="outline"
-            className="w-full justify-start gap-2 bg-white hover:bg-gray-50 border-gray-200"
+            className="w-full justify-start gap-2 bg-transparent hover:bg-neutral-800 border-neutral-700 text-neutral-300"
             onClick={startNewChat}
           >
-            <Plus size={16} className="text-gray-500" />
+            <Plus size={16} className="text-neutral-400" />
             <span className="font-light">New Design Chat</span>
           </Button>
         </div>
         <div className="px-3">
-          <div className="h-px bg-gray-100 w-full" />
+          <div className="h-px bg-neutral-800 w-full" />
         </div>
         <ScrollArea className="flex-1 px-3 py-2">
           {Object.entries(
@@ -107,14 +96,14 @@ export default function Chat() {
             }, {}),
           ).map(([date, chats]) => (
             <div key={date} className="mb-4">
-              <h3 className="mb-2 text-xs font-medium text-gray-400 px-2">{date}</h3>
+              <h3 className="mb-2 text-xs font-medium text-neutral-500 px-2">{date}</h3>
               {chats.map((chat) => (
                 <Button
                   key={chat.id}
                   variant="ghost"
                   className={`w-full justify-start gap-2 mb-1 h-9 px-2 font-light ${selectedChat === chat.id
-                      ? "bg-gray-100 text-gray-900"
-                      : "text-gray-600 hover:bg-gray-50"
+                      ? "bg-neutral-800 text-neutral-200"
+                      : "text-neutral-400 hover:bg-neutral-800"
                     }`}
                   onClick={() => setSelectedChat(chat.id)}
                 >
@@ -127,8 +116,18 @@ export default function Chat() {
         </ScrollArea>
       </div>
 
-      {/* main chat area */}
-      <div className="flex-1 flex flex-col h-full bg-white">
+      {/* Main chat area */}
+      <div className="flex-1 flex flex-col h-full">
+        <div className="p-4 md:hidden">
+          <Button
+            onClick={toggleMobileSidebar}
+            variant="ghost"
+            size="icon"
+            className="text-neutral-400 hover:text-neutral-300 hover:bg-neutral-800"
+          >
+            <Menu size={24} />
+          </Button>
+        </div>
         <ScrollArea className="flex-1 px-4 py-6">
           {messages.map((message) => (
             <div
@@ -138,13 +137,12 @@ export default function Chat() {
             >
               {message.role === "assistant" && (
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-gray-100 text-gray-600 text-xs">AI</AvatarFallback>
+                  <AvatarFallback className="bg-violet-500 text-white text-xs">AI</AvatarFallback>
                 </Avatar>
               )}
               <div className={`flex flex-col gap-2 ${message.role === "user" ? "items-end" : "items-start"}`}>
                 <div
-                  className={`rounded-2xl px-4 py-2.5 max-w-[85%] text-sm ${message.role === "user" ? "bg-black text-white" : "bg-gray-100 text-gray-800"
+                  className={`rounded-2xl px-4 py-2.5 max-w-[85%] text-sm ${message.role === "user" ? "bg-violet-500 text-white" : "bg-neutral-800 text-neutral-200"
                     }`}
                 >
                   {message.content}
@@ -156,21 +154,21 @@ export default function Chat() {
                     alt={`Fashion reference ${index + 1}`}
                     width={200}
                     height={200}
-                    className="rounded-lg border border-gray-200"
+                    className="rounded-lg border border-neutral-700"
                   />
                 ))}
               </div>
               {message.role === "user" && (
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-black text-white text-xs">YOU</AvatarFallback>
+                  <AvatarFallback className="bg-violet-500 text-white text-xs">YOU</AvatarFallback>
                 </Avatar>
               )}
             </div>
           ))}
         </ScrollArea>
 
-        {/* input area */}
-        <div className="px-4 py-4 border-t border-gray-100 bg-white">
+        {/* Input area */}
+        <div className="px-4 py-4 border-t border-neutral-800">
           <div className="max-w-3xl mx-auto">
             <form onSubmit={handleSubmit} className="flex gap-2 items-center">
               <input
@@ -185,7 +183,7 @@ export default function Chat() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                className="text-neutral-400 hover:text-neutral-300 hover:bg-neutral-800"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <ImagePlus size={18} />
@@ -194,21 +192,20 @@ export default function Chat() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about fashion trends, designs, or upload an image..."
-                className="flex-1 border-gray-200 focus-visible:ring-gray-400 text-sm"
-                disabled={isLoading}
+                className="flex-1 bg-transparent border-neutral-700 focus-visible:ring-violet-500 focus-visible:ring-2 text-sm text-neutral-200 placeholder:text-neutral-500 h-10 px-4"
               />
-              <Button
-                type="submit"
-                size="icon"
-                className="bg-black hover:bg-gray-800 text-white"
-                disabled={isLoading}
-              >
+              <Button type="submit" size="icon" className="bg-violet-500 hover:bg-violet-600 text-white">
                 <Send size={16} />
               </Button>
             </form>
           </div>
         </div>
       </div>
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={toggleMobileSidebar} />
+      )}
     </div>
   )
 }
+
+export default Chat
