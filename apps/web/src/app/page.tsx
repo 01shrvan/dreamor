@@ -16,6 +16,7 @@ const Chat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selectedChat, setSelectedChat] = useState<string | null>(null)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+  const [hasUserInput, setHasUserInput] = useState(false) // New state variable
 
   // Fashion-specific chat history
   const chatHistory: ChatHistory[] = [
@@ -28,6 +29,8 @@ const Chat = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!input.trim() && !files) return
+
+    setHasUserInput(true) // Update state when user submits a command
 
     // Create a new message
     const newMessage: Message = {
@@ -64,6 +67,7 @@ const Chat = () => {
   const startNewChat = () => {
     setSelectedChat(null)
     setMessages([])
+    setHasUserInput(false) // Reset state when starting a new chat
   }
 
   const toggleMobileSidebar = () => setIsMobileSidebarOpen((prev) => !prev)
@@ -130,6 +134,11 @@ const Chat = () => {
           </Button>
         </div>
         <ScrollArea className="flex-1 px-4 py-6">
+          {!hasUserInput && messages.length === 0 && (
+            <div className="flex justify-center items-center h-full text-[#596e79]">
+              <p className="font-bold text-center text-2xl">Welcome to the Fashion Chat! Ask about fashion trends, designs, or upload an image to get started.</p>
+            </div>
+          )}
           {messages.map((message) => (
             <div
               key={message.id}
