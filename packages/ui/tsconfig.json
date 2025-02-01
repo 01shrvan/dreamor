@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@ui/*": ["./src/*"]
+      "@/*": ["./src/*"]
     },
     "outDir": "dist",
     "jsx": "react-jsx",
