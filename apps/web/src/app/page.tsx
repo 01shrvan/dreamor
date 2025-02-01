@@ -127,7 +127,7 @@ export default function Chat() {
         </ScrollArea>
       </div>
 
-      {/* Main Chat Area */}
+      {/* main chat area */}
       <div className="flex-1 flex flex-col h-full bg-white">
         <ScrollArea className="flex-1 px-4 py-6">
           {messages.map((message) => (
@@ -169,7 +169,7 @@ export default function Chat() {
           ))}
         </ScrollArea>
 
-        {/* Input Area */}
+        {/* input area */}
         <div className="px-4 py-4 border-t border-gray-100 bg-white">
           <div className="max-w-3xl mx-auto">
             <form onSubmit={handleSubmit} className="flex gap-2 items-center">
